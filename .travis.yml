@@ -8,3 +8,8 @@ before_install:
   - npm install --global yarn
 install:
   - make
+services:
+  - mongo-server
+addons:
+  hosts:
+    - mongo
