@@ -12,3 +12,7 @@ services:
     tty: true
     command: bash
     working_dir: /srv
+    links:
+      - mongo
+  mongo:
+    image: mongo

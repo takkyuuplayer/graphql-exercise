@@ -1,32 +1,35 @@
 import assert from 'power-assert';
 
 import resolvers from './resolvers';
+import connectMongo from '../mongoConnector';
 
 describe('schema/resolvers', () => {
-  const Query = resolvers.Query
+  let mongo;
+  before(async () => {
+    mongo = await connectMongo();
+    await mongo.db.collection('links').remove();
+  });
+  after(async () => {
+    await mongo.db.close();
+  });
+
   describe('.Query', () => {
-    it('can return all links', () => {
-      assert.strictEqual(Query.allLinks().length, 2);
+    it('can return all links', async () => {
+      const links = await resolvers.Query.allLinks(null, null, { mongo });
+      assert.strictEqual(links.length, 0);
     });
   });
 
-  const Mutation = resolvers.Mutation;
   describe('.Mutation', () => {
-
-    it('can create new link', () => {
-      Mutation.createLink(null, {
+    it('can create new link', async () => {
+      await resolvers.Mutation.createLink(null, {
         url: 'http://www.takkyuuplayer.com',
         describe: 'my website',
-      });
+      }, { mongo });
 
-      const allLinks = Query.allLinks()
+      const links = await resolvers.Query.allLinks(null, null, { mongo });
 
-      assert.strictEqual(allLinks.length, 3)
-      assert.deepStrictEqual(allLinks[2], {
-        id: 3,
-        url: 'http://www.takkyuuplayer.com',
-        describe: 'my website',
-      });
+      assert.strictEqual(links.length, 1)
     });
   });
 });
